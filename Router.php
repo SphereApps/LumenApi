@@ -93,7 +93,16 @@ class Router
 
             foreach ($methods as $action => $opt) {
                 $httpMethod = $opt['method'];
-                $router->$httpMethod($opt['route'] ?? '', [
+
+                $route = '';
+
+                if (isset($options->route)) {
+                    $route = $options->route;
+                } elseif (isset($opt['route'])) {
+                    $route = $opt['route'];
+                }
+
+                $router->$httpMethod($route, [
                     'uses' => $options->controller.'@'.$action
                 ]);
             }

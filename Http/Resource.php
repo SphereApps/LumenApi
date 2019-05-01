@@ -14,7 +14,7 @@ class Resource extends JsonResource
 
     public static function collection($resource, $wrapResult = false)
     {
-        $calledClass = get_called_class();
+        $calledClass     = get_called_class();
         $collectionClass = $calledClass . 'Collection';
         if (!class_exists($collectionClass)) {
             $collectionClass = ResourceCollection::class;
@@ -32,5 +32,20 @@ class Resource extends JsonResource
         return is_array($this->resource)
             ? $this->resource
             : $this->resource->toArray();
+    }
+
+    /**
+     * Merge a relationship if it has been loaded.
+     *
+     * @param  string $relationship
+     * @param  mixed  $value
+     * @return \Illuminate\Http\Resources\MergeValue|mixed
+     */
+    protected function mergeWhenLoaded($relationship, $value)
+    {
+        return $this->mergeWhen(
+            $this->resource->relationLoaded($relationship) && $this->resource->{$relationship},
+            $value
+        );
     }
 }
