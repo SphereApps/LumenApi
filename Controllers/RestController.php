@@ -3,6 +3,7 @@
 namespace Sphere\Api\Controllers;
 
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use InvalidArgumentException;
 use Sphere\Api\Helpers\WithMedia;
@@ -74,16 +75,29 @@ class RestController extends Controller
      */
     public function index()
     {
-        $model = $this->model();
+        $query = $this->model()->query();
 
-        $this->processor->applyRelations($model);
-        $this->processor->applyScopes($model);
-        $this->processor->applySorting($model);
-        $this->processor->applyFilters($model);
+        $this->processor->applyRelations($query);
+        $this->processor->applyScopes($query);
+        $this->processor->applySorting($query);
+        $this->processor->applyFilters($query);
 
-        $paginator = $this->processor->makePaginator($model);
+        $query = $this->fetching($query);
+
+        $paginator = $this->processor->makePaginator($query);
 
         return $this->response->collection($paginator);
+    }
+
+    /**
+     * Вызывается перед получением списка записей
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function fetching(Builder $query)
+    {
+        return $query;
     }
 
     /**
@@ -93,15 +107,42 @@ class RestController extends Controller
      */
     public function read($id)
     {
-        $model = $this->model();
+        $query = $this->model()->query();
 
-        $this->processor->applyRelations($model);
+        $this->processor->applyRelations($query);
         // $this->processor->applyScopes($model);
         // $this->processor->applyFilters($model);
 
-        $record = $model->findOrFail($id);
+        $query = $this->reading($query);
+
+        $record = $query->findOrFail($id);
+
+        $record = $this->readed($record);
 
         return $this->response->item($record);
+    }
+
+    /**
+     * Вызывается перед получением записи
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function reading(Builder $query)
+    {
+        return $query;
+    }
+
+    /**
+     * Вызывается после получения записи
+     * Если удастся придумать название метода получше - будет здорово
+     *
+     * @param Model $record
+     * @return Model
+     */
+    public function readed(Model $record)
+    {
+        return $record;
     }
 
     /**
@@ -112,15 +153,46 @@ class RestController extends Controller
      */
     public function create()
     {
-        $record = $this->makeModel();
+        $model = $this->makeModel();
 
-        if (!($record instanceof Model)) {
-            return $record;
+        if (!($model instanceof Model)) {
+            return $model;
         }
 
-        $record->save();
+        $model = $this->creating($model);
 
-        return $this->read($record->id);
+        // Из creating можно вернуть ошибку, и мы вернем ее пользователю
+        if (is_array($model)) {
+            return $model;
+        }
+
+        $model->save();
+
+        $model = $this->created($model);
+
+        return $this->response->item($model);
+    }
+
+    /**
+     * Вызывается перед созданием записи
+     *
+     * @param Model $model
+     * @return Model
+     */
+    public function creating(Model $model)
+    {
+        return $model;
+    }
+
+    /**
+     * Вызывается после создания записи
+     *
+     * @param Model $model
+     * @return Model
+     */
+    public function created(Model $model)
+    {
+        return $model;
     }
 
     /**
@@ -167,15 +239,49 @@ class RestController extends Controller
 
             // Проверяем только поля которые были изменены (отправлены)
             $rules = $record->rules();
+
             if ($rules) {
                 $rules = array_only($rules, array_keys($data));
+
                 $this->validate($this->request, $rules);
             }
 
+            $record = $this->updating($record, $data);
+
+            // Из updating можно вернуть ошибку, и мы вернем ее пользователю
+            if (is_array($record)) {
+                return $record;
+            }
+
             $record->save();
+
+            $record = $this->updated($record);
         }
 
-        return $this->read($id);
+        return $this->response->item($record);
+    }
+
+    /**
+     * Вызывается перед обновлением записи
+     *
+     * @param Model $record
+     * @param array $data
+     * @return Model
+     */
+    public function updating(Model $record, $data)
+    {
+        return $record;
+    }
+
+    /**
+     * Вызывается после обновления записи
+     *
+     * @param Model $record
+     * @return Model
+     */
+    public function updated(Model $record)
+    {
+        return $record;
     }
 
     /**
@@ -193,11 +299,37 @@ class RestController extends Controller
             $this->authorize('delete', $record);
         }
 
+        $record = $this->deleting($record);
+
         if ($record->delete()) {
+            $record = $this->deleted($record);
+
             return $this->response->success('');
         }
 
         return $this->response->error(Error::REST_DELETE_RECORD_ERROR);
+    }
+
+    /**
+     * Вызывается перед удалением записи
+     *
+     * @param Model $record
+     * @return Model
+     */
+    public function deleting(Model $record)
+    {
+        return $record;
+    }
+
+    /**
+     * Вызывается после удаления записи
+     *
+     * @param Model $record
+     * @return Model
+     */
+    public function deleted(Model $record)
+    {
+        return $record;
     }
 
 
