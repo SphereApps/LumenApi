@@ -6,8 +6,29 @@ use Laravel\Lumen\Routing\Router as LumenRouter;
 use Sphere\Api\Controllers\RestController;
 use Sphere\Api\Controllers\AuthController;
 
+/**
+ * @method void get($url, $controller)
+ * @method void post($url, $controller)
+ * @method void patch($url, $controller)
+ * @method void destroy($url, $controller)
+ * @method void index($url, $options)
+ * @method void create($url, $options)
+ * @method void read($url, $options)
+ * @method void update($url, $options)
+ * @method void delete($url, $options)
+ */
 class Router
 {
+    /**
+     * Обношение http методов к функциям обработчиков
+     */
+    const HTTP_VERB_TO_METHOD_MAP = [
+        'get'     => 'read',
+        'post'    => 'create',
+        'patch'   => 'update',
+        'destroy' => 'delete',
+    ];
+
     protected $router;
     protected $resources = [];
     protected $currentScope;
@@ -165,6 +186,18 @@ class Router
             $options['only'] = [$method];
 
             $this->resource($name, $options);
+
+            return null;
+        }
+
+        if (array_key_exists($method, static::HTTP_VERB_TO_METHOD_MAP)) {
+            [$url, $controller] = $args;
+
+            $this->resource($url, [
+                'only'       => [static::HTTP_VERB_TO_METHOD_MAP[$method]],
+                'controller' => $controller,
+                'route'      => '',
+            ]);
 
             return null;
         }
