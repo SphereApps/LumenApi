@@ -26,6 +26,7 @@ class ResponseWrapper
     public function item($content)
     {
         $resource = $this->resourceClass;
+
         return new $resource($content);
     }
 

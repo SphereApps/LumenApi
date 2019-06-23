@@ -27,6 +27,9 @@ class AuthController extends RestController
 
     public function user()
     {
+        if ($relations = $this->processor->getRelations()) {
+            $this->user->load($relations);
+        }
         return $this->response->item($this->user);
     }
 

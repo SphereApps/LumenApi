@@ -79,17 +79,19 @@ class ExceptionHandler extends Handler
 
             case $e instanceof ValidationException:
                 return $this->response->error(Error::REST_VALIDATION_EXCEPTION, [
-                    'message' => $e->getMessage(),
+                    'message' => 'Переданы некорректные данные',
                     'validation' => $e->errors(),
                 ]);
 
             case $e instanceof QueryException:
                 $errorInfo = $e->errorInfo;
+
                 return $this->response->error([
                     // http://mysql-python.sourceforge.net/MySQLdb-1.2.2/public/MySQLdb.constants.ER-module.html
                     'code' => $errorInfo[1],
                     'exception' => 'QueryException',
                     'message' => isset($errorInfo[2]) ? $errorInfo[2] : '',
+                    'trace' => $this->getExceptionTrace($e),
                 ]);
         }
 
@@ -109,5 +111,14 @@ class ExceptionHandler extends Handler
 
 
         return parent::render($request, $e);
+    }
+
+    protected function getExceptionTrace(Exception $e) {
+        return collect($e->getTrace())->map(function($row){
+            if ($row['file'] ?? false) {
+                $row['file'] = ltrim($row['file'], base_path());
+            }
+            return array_only($row, ['file', 'line', 'function', 'class']);
+        });
     }
 }

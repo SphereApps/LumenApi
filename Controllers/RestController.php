@@ -5,6 +5,7 @@ namespace Sphere\Api\Controllers;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use InvalidArgumentException;
 use Sphere\Api\Helpers\WithMedia;
 use Sphere\Api\Model;
@@ -155,6 +156,7 @@ class RestController extends Controller
     {
         $model = $this->makeModel();
 
+        // @todo Неочевидная логика. Либо мы кидаем исключение люибо разрешаем использовать стандартную eloquent модель
         if (!($model instanceof Model)) {
             return $model;
         }
@@ -210,6 +212,7 @@ class RestController extends Controller
         /** @var \Sphere\Api\Model $record */
         $record = $this->model($data);
 
+        // @todo при использовании стандартной eloquent модели этого метода может и не быть. Можно сделать его обязательным, тогда нужно кидать исключение
         $rules = $record->rules();
         if ($rules) {
             $this->validate($this->request, $rules);
@@ -351,6 +354,7 @@ class RestController extends Controller
 
     protected function getRequestContent()
     {
+
         if ($this->request->isJson()) {
             $content = $this->request->getContent();
 
@@ -360,14 +364,9 @@ class RestController extends Controller
         } elseif ($this->request->files->count() > 0) {
             $data = $this->request->input();
 
-            try {
-                foreach ($this->request->files->keys() as $key) {
-                    $file = $this->request->file($key);
-
-                    $data[$key] = $this->uploadFile($file, $key);
-                }
-            } catch (InvalidArgumentException | FileException $e) {
-                return [];
+            foreach ($this->request->files->keys() as $key) {
+                $file = $this->request->file($key);
+                $data[$key] = $this->uploadFile($file, $key);
             }
 
             return $data;
@@ -387,17 +386,19 @@ class RestController extends Controller
     {
         $modelClass = $this->options('model');
 
-        if (!is_a($modelClass, WithMedia::class, true)) {
-            throw new InvalidArgumentException('model dont implement WithMedia interface');
+        if (is_a($modelClass, WithMedia::class, true)) {
+            $filePath = $modelClass::uploadPath($key);
+        } else {
+            $filePath = snake_case(class_basename($modelClass));
         }
 
-        $filePath = $modelClass::uploadPath($key);
+        $filePath = $filePath . DIRECTORY_SEPARATOR . $file->hashName();
 
-        $filename = $file->hashName();
+        // Не используем $file->move() т.к. он перемещает файл и последуещая иъекция Request в ресурсе
+        // приводит к ошибке т.к. автоматически создваваемый FileBag не находит перемещенный файл
+        File::copy($file->getPathname(), storage_path('app' . DIRECTORY_SEPARATOR . $filePath));
 
-        $file->move(storage_path("app/{$filePath}"), $filename);
-
-        return "{$filePath}/{$filename}";
+        return $filePath;
     }
 
     protected function initProcessor()

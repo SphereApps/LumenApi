@@ -7,6 +7,9 @@ use Sphere\Api\Helpers\ResponseWrapper;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
+/**
+ * @property ResponseWrapper response
+ */
 class Controller extends BaseController
 {
 
