@@ -82,6 +82,12 @@ class Router
         });
     }
 
+    public function group(array $attributes, \Closure $callback)
+    {
+        $this->router->group($attributes, function() use ($callback) {
+            call_user_func($callback, $this);
+        });
+    }
 
     public function resource($name, $options, $custom = null)
     {
