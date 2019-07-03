@@ -88,7 +88,7 @@ class ExceptionHandler extends Handler
 
                 return $this->response->error([
                     // http://mysql-python.sourceforge.net/MySQLdb-1.2.2/public/MySQLdb.constants.ER-module.html
-                    'code' => $errorInfo[1],
+                    'code' => $errorInfo[1] ?? $errorInfo,
                     'exception' => 'QueryException',
                     'message' => isset($errorInfo[2]) ? $errorInfo[2] : '',
                     'trace' => $this->getExceptionTrace($e),
