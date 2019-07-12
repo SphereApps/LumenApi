@@ -4,6 +4,7 @@ namespace Sphere\Api\Controllers;
 
 use Sphere\Api\Error;
 
+//@todo убрать реализацию авторизации из пакета. Оставить только интерфейс (?)
 class AuthController extends RestController
 {
     public function login()
@@ -11,8 +12,8 @@ class AuthController extends RestController
         $request = $this->request;
 
         $this->validate($request, [
-            'email'     => 'required|email',
-            'password'  => 'required'
+            'email' => 'required|email',
+            'password' => 'required'
         ]);
 
         $credentials = $request->only(['email', 'password']);
@@ -47,11 +48,13 @@ class AuthController extends RestController
 
     protected function respondWithToken($token)
     {
+        $ttlSeconds = app('auth')->factory()->getTTL() * 60;
+
         return $this->response->success([
             'token' => $token,
             'token_type' => 'bearer',
-            'ttl' => app('auth')->factory()->getTTL() * 60,
-            'expires_at' => app('auth')->factory()->getTTL() * 60 + time(),
+            'ttl' => $ttlSeconds,
+            'expires_at' => time() + $ttlSeconds,
         ]);
     }
 }

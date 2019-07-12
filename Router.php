@@ -45,9 +45,13 @@ class Router
     public function __construct(LumenRouter $router)
     {
         $this->router = $router;
+
+        if ($defaultOptions = config("api.defaultOptions")) {
+            $this->setDefaultOptions($defaultOptions);
+        }
     }
 
-    public function setDefaultOptions($defaultOptions)
+    public function setDefaultOptions(array $defaultOptions)
     {
         $this->defaultOptions = $defaultOptions;
     }
@@ -77,6 +81,12 @@ class Router
         $this->resource('auth', (array) $options, function ($router, $options) {
             $router->post('login', ['uses' => $options->controller.'@login']);
             $router->get('user', ['uses' => $options->controller.'@user', 'middleware' => 'auth']);
+            $router->get('logout', ['uses' => $options->controller.'@logout']);
+
+            //@todo данный метод связан с авторизацией по jwt - нужно его убрать из пакета
+            $router->get('refresh', ['uses' => $options->controller.'@refresh']);
+
+            //@deprecated Используем только get и post
             $router->patch('refresh', ['uses' => $options->controller.'@refresh']);
             $router->delete('logout', ['uses' => $options->controller.'@logout']);
         });

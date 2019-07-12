@@ -6,15 +6,18 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
-use InvalidArgumentException;
 use Sphere\Api\Helpers\WithMedia;
+use Sphere\Api\Http\Resource;
 use Sphere\Api\Model;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
-use Validator;
-use Illuminate\Http\Request;
 use Sphere\Api\Utils\RequestProcessor;
 use Sphere\Api\Error;
 
+/**
+ * Class RestController
+ * @package Sphere\Api\Controllers
+ *
+ * @property RequestProcessor $processor
+ */
 class RestController extends Controller
 {
 
@@ -51,6 +54,9 @@ class RestController extends Controller
         $this->loadResourceOptions();
     }
 
+    /**
+     * @throws Exception
+     */
     protected function loadResourceOptions()
     {
         $options = app('Sphere\Api\Router')->getCurrentResourceOptions();
