@@ -6,11 +6,11 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Sphere\Api\Error;
 use Sphere\Api\Helpers\WithMedia;
 use Sphere\Api\Http\Resource;
 use Sphere\Api\Model;
 use Sphere\Api\Utils\RequestProcessor;
-use Sphere\Api\Error;
 
 /**
  * Class RestController
@@ -46,7 +46,7 @@ class RestController extends Controller
 
     /**************************************************************************
         System
-    **************************************************************************/
+     **************************************************************************/
 
     public function boot()
     {
@@ -74,7 +74,7 @@ class RestController extends Controller
 
     /**************************************************************************
         REST Methods
-    **************************************************************************/
+     **************************************************************************/
 
     /**
      * Список записей
@@ -344,7 +344,7 @@ class RestController extends Controller
 
     /**************************************************************************
         Helpers
-    **************************************************************************/
+     **************************************************************************/
 
     /**
      * Создаем экземпляр модели

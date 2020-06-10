@@ -98,12 +98,12 @@ class RequestProcessor
 
         // Page
         if ($request->has('page')) {
-            $this->params['page'] = max(1, (int)$request->get('page'));
+            $this->params['page'] = max(1, (int) $request->get('page'));
         }
 
         // Limit
         if ($request->has('limit')) {
-            $this->params['limit'] = min(static::LIMIT_MAX, max(1, (int)$request->get('limit')));
+            $this->params['limit'] = min(static::LIMIT_MAX, max(1, (int) $request->get('limit')));
         }
     }
 
@@ -117,9 +117,6 @@ class RequestProcessor
 
         foreach ($requestFilters as $field => $filterString) {
             if ($this->allow('filters', $field)) {
-                if (!$filterString) {
-                    throw new BadRequestHttpException("Filter operator or value not set for filter: {$field}");
-                }
                 $filterSegments = explode(':', $filterString, 2);
                 if (count($filterSegments) == 1) {
                     $filterSegments = ['eq', $filterSegments];
@@ -153,7 +150,7 @@ class RequestProcessor
                     $arguments[] = $value;
                 }
 
-                $this->params['filters'][] = [ $method => $arguments ];
+                $this->params['filters'][] = [$method => $arguments];
             }
         }
     }
@@ -164,7 +161,8 @@ class RequestProcessor
         $this->params['sorting'] = [];
         foreach ($values as $field) {
             $direction = 'ASC';
-            if ($field{0} === '-') {
+            if ($field{
+                0} === '-') {
                 $direction = 'DESC';
                 $field = substr($field, 1);
             }
