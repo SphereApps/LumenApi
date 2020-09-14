@@ -162,7 +162,7 @@ class RestController extends Controller
     {
         $model = $this->makeModel();
 
-        // @todo Неочевидная логика. Либо мы кидаем исключение люибо разрешаем использовать стандартную eloquent модель
+        // @todo Неочевидная логика. Либо мы кидаем исключение либо разрешаем использовать стандартную eloquent модель
         if (!($model instanceof Model)) {
             return $model;
         }
@@ -176,9 +176,9 @@ class RestController extends Controller
 
         $model->save();
 
-        $model = $this->created($model);
+        $this->created($model);
 
-        return $this->response->item($model);
+        return $this->read($model->id);
     }
 
     /**
@@ -267,7 +267,7 @@ class RestController extends Controller
             $record = $this->updated($record);
         }
 
-        return $this->response->item($record);
+        return $this->read($record->id);
     }
 
     /**
