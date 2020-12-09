@@ -27,6 +27,11 @@ class Resource extends JsonResource
         return $datetime ? $datetime->toIso8601String() : $datetime;
     }
 
+    public function setMeta(array $metaData)
+    {
+        $this->with['meta'] = $metaData;
+    }
+
     public function toArray($request)
     {
         return is_array($this->resource)
