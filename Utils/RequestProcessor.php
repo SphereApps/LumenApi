@@ -161,8 +161,7 @@ class RequestProcessor
         $this->params['sorting'] = [];
         foreach ($values as $field) {
             $direction = 'ASC';
-            if ($field{
-                0} === '-') {
+            if ($field[0] === '-') {
                 $direction = 'DESC';
                 $field = substr($field, 1);
             }
