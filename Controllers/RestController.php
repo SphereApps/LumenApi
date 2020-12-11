@@ -240,7 +240,8 @@ class RestController extends Controller
         $record = $this->model()->findOrFail($id);
 
         if ($this->options['policy']) {
-            $this->authorize('update', $record);
+            // временно убрал зависимость от authorize (нужно найти более универсальное решение)
+            // $this->authorize('update', $record);
         }
 
         if ($data = $this->getRequestContent()) {
@@ -305,7 +306,8 @@ class RestController extends Controller
         $record = $this->model()->findOrFail($id);
 
         if ($this->options['policy']) {
-            $this->authorize('delete', $record);
+            // временно убрал зависимость от authorize (нужно найти более универсальное решение)
+            // $this->authorize('delete', $record);
         }
 
         $record = $this->deleting($record);
