@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Sphere\Api\Error;
 use Sphere\Api\Helpers\WithMedia;
 use Sphere\Api\Http\Resource;
@@ -397,7 +398,7 @@ class RestController extends Controller
         if (is_a($modelClass, WithMedia::class, true)) {
             $filePath = $modelClass::uploadPath($key);
         } else {
-            $filePath = snake_case(class_basename($modelClass));
+            $filePath = Str::plural(Str::snake(class_basename($modelClass)));
         }
 
         $file->store($filePath);
