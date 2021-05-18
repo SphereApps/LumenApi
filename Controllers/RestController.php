@@ -5,7 +5,7 @@ namespace Sphere\Api\Controllers;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Sphere\Api\Error;
 use Sphere\Api\Helpers\WithMedia;
 use Sphere\Api\Http\Resource;
@@ -400,13 +400,9 @@ class RestController extends Controller
             $filePath = snake_case(class_basename($modelClass));
         }
 
-        $filePath = $filePath . DIRECTORY_SEPARATOR . $file->hashName();
+        $file->store($filePath);
 
-        // Не используем $file->move() т.к. он перемещает файл и последуещая иъекция Request в ресурсе
-        // приводит к ошибке т.к. автоматически создваваемый FileBag не находит перемещенный файл
-        File::copy($file->getPathname(), storage_path('app' . DIRECTORY_SEPARATOR . $filePath));
-
-        return $filePath;
+        return Storage::url($filePath . DIRECTORY_SEPARATOR . $file->hashName());
     }
 
     protected function initProcessor()
