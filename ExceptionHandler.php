@@ -67,21 +67,26 @@ class ExceptionHandler extends Handler
                 return $this->response->error(Error::AUTH_UNAUTORIZED);
 
             case $e instanceof ValidationException:
-                return $this->response->error(Error::REST_VALIDATION_EXCEPTION, [
-                    'message' => 'Переданы некорректные данные',
-                    'validation' => $e->errors(),
-                ]);
+                return $this->response->error(
+                    Error::REST_VALIDATION_EXCEPTION,
+                    [
+                        'message' => 'Переданы некорректные данные',
+                        'validation' => $e->errors(),
+                    ]
+                );
 
             case $e instanceof QueryException:
                 $errorInfo = $e->errorInfo;
 
-                return $this->response->error([
-                                                  // http://mysql-python.sourceforge.net/MySQLdb-1.2.2/public/MySQLdb.constants.ER-module.html
-                                                  'code' => $errorInfo[1] ?? $errorInfo,
-                                                  'exception' => 'QueryException',
-                                                  'message' => isset($errorInfo[2]) ? $errorInfo[2] : '',
-                                                  'trace' => $this->getExceptionTrace($e),
-                                              ]);
+                return $this->response->error(
+                    [
+                        // http://mysql-python.sourceforge.net/MySQLdb-1.2.2/public/MySQLdb.constants.ER-module.html
+                        'code' => $errorInfo[1] ?? $errorInfo,
+                        'exception' => 'QueryException',
+                        'message' => isset($errorInfo[2]) ? $errorInfo[2] : '',
+                        'trace' => $this->getExceptionTrace($e),
+                    ]
+                );
         }
 
         if ($request->ajax() || $request->wantsJson()) {
@@ -102,13 +107,16 @@ class ExceptionHandler extends Handler
         return parent::render($request, $e);
     }
 
-    protected function getExceptionTrace(Exception $e) {
-        return collect($e->getTrace())->map(function($row){
-            if ($row['file'] ?? false) {
-                $row['file'] = ltrim($row['file'], base_path());
+    protected function getExceptionTrace(Exception $e)
+    {
+        return collect($e->getTrace())->map(
+            function ($row) {
+                if ($row['file'] ?? false) {
+                    $row['file'] = ltrim($row['file'], base_path());
+                }
+                return array_intersect_key($row, array_flip(['file', 'line', 'function', 'class']));
             }
-            return array_intersect_key($row, array_flip(['file', 'line', 'function', 'class']));
-        });
+        );
     }
 }
 
