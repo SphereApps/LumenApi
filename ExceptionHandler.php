@@ -11,11 +11,13 @@ use Laravel\Lumen\Exceptions\Handler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 use Sphere\Api\Helpers\ResponseWrapper;
-use Sphere\Api\Error;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class ExceptionHandler extends Handler
 {
+    protected $response;
+
     /**
      * A list of the exception types that should not be reported.
      *
@@ -37,10 +39,10 @@ class ExceptionHandler extends Handler
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
+     * @param  Throwable  $exception
      * @return \Illuminate\Http\Response
      */
-    public function render($request, Exception $e)
+    public function render($request, Throwable $e)
     {
         if ($e instanceof ModelNotFoundException) {
             $e = new NotFoundHttpException($e->getMessage(), $e);
@@ -74,12 +76,12 @@ class ExceptionHandler extends Handler
                 $errorInfo = $e->errorInfo;
 
                 return $this->response->error([
-                    // http://mysql-python.sourceforge.net/MySQLdb-1.2.2/public/MySQLdb.constants.ER-module.html
-                    'code' => $errorInfo[1] ?? $errorInfo,
-                    'exception' => 'QueryException',
-                    'message' => isset($errorInfo[2]) ? $errorInfo[2] : '',
-                    'trace' => $this->getExceptionTrace($e),
-                ]);
+                                                  // http://mysql-python.sourceforge.net/MySQLdb-1.2.2/public/MySQLdb.constants.ER-module.html
+                                                  'code' => $errorInfo[1] ?? $errorInfo,
+                                                  'exception' => 'QueryException',
+                                                  'message' => isset($errorInfo[2]) ? $errorInfo[2] : '',
+                                                  'trace' => $this->getExceptionTrace($e),
+                                              ]);
         }
 
         if ($request->ajax() || $request->wantsJson()) {
@@ -105,7 +107,8 @@ class ExceptionHandler extends Handler
             if ($row['file'] ?? false) {
                 $row['file'] = ltrim($row['file'], base_path());
             }
-            return array_only($row, ['file', 'line', 'function', 'class']);
+            return array_intersect_key($row, array_flip(['file', 'line', 'function', 'class']));
         });
     }
 }
+
