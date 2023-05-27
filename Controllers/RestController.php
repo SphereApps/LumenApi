@@ -21,7 +21,6 @@ use Sphere\Api\Utils\RequestProcessor;
  */
 class RestController extends Controller
 {
-
     protected $defaultOptions = [
         // Classes
         'model' => null,
@@ -252,8 +251,7 @@ class RestController extends Controller
             $rules = $record->rules();
 
             if ($rules) {
-                $rules = array_only($rules, array_keys($data));
-
+                $rules = array_intersect_key($rules, array_flip(array_keys($data)));
                 $this->validate($this->request, $rules);
             }
 
@@ -363,7 +361,6 @@ class RestController extends Controller
 
     protected function getRequestContent()
     {
-
         if ($this->request->isJson()) {
             $content = $this->request->getContent();
 
