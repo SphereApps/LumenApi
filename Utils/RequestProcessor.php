@@ -256,7 +256,7 @@ class RequestProcessor
     public function applyScopes(&$model)
     {
         if ($scopes = $this->getScopes()) {
-            foreach ($scopes as $method => $arguments) { info($method);
+            foreach ($scopes as $method => $arguments) {
                 $model = call_user_func_array([$model, $method], $arguments);
             }
         }
