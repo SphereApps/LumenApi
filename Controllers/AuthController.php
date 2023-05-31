@@ -2,6 +2,8 @@
 
 namespace Sphere\Api\Controllers;
 
+use App\Models\User;
+use Illuminate\Support\Str;
 use Sphere\Api\Error;
 
 //@todo убрать реализацию авторизации из пакета. Оставить только интерфейс (?)
@@ -13,7 +15,7 @@ class AuthController extends RestController
 
         $this->validate($request, [
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
         $credentials = $request->only(['email', 'password']);
@@ -23,11 +25,19 @@ class AuthController extends RestController
             return $this->response->error(Error::AUTH_WRONG_LOGIN_OR_PASSWORD);
         }
 
+        if (!User::where('email', Str::lower($request->email))->active()->exists()) {
+            return $this->response->error('Извините, ваш аккаунт переведен в архив', ['code' => 5103]);
+        }
+
         return $this->respondWithToken($token);
     }
 
     public function user()
     {
+        if (!$this->user->is_active) {
+            return $this->response->error('Извините, ваш аккаунт переведен в архив', ['code' => 5103]);
+        }
+
         if ($relations = $this->processor->getRelations()) {
             $this->user->load($relations);
         }
