@@ -221,7 +221,7 @@ class RestController extends Controller
         // @todo при использовании стандартной eloquent модели этого метода может и не быть. Можно сделать его обязательным, тогда нужно кидать исключение
         $rules = $record->rules();
         if ($rules) {
-            $this->validate($this->request, $rules);
+            $this->validate($this->request, $rules, method_exists($record,'ruleMessages') ? $record->ruleMessages() : []);
         }
 
         return $record;

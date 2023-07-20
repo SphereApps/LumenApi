@@ -15,4 +15,9 @@ class Model extends Eloquent
     {
         return [];
     }
+
+    public function ruleMessages(): array
+    {
+        return [];
+    }
 }
